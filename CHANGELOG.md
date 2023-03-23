@@ -4,7 +4,7 @@
   Placeholder for the next version (at the beginning of the line):
   ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 0.0.4 (2023-03-23)
 - test tooling once more.
 
 ## 0.0.3 (2023-03-23)
