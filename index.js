@@ -57,7 +57,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
             this.log.error('Error in opening box:', err);
         } else {
             //params.debug("Box:", box);
-            this.log.log('Idle at work now.');
+            this.log.info('Idle at work now.');
         }
     }
 
