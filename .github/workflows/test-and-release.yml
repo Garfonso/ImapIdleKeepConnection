@@ -22,19 +22,30 @@ jobs:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
 
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x] # This should be LTS
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+          cache: "npm"
 
-      - name: Lint
-        run: |
-          npm run lint
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Perform a type check
+        run: npm run check
+        env:
+          CI: true
+
+      - name: Lint TypeScript code
+        run: npm run lint
 
   # Deploys the final package to NPM and Github Actions
   deploy:
