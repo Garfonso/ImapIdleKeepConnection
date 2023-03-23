@@ -1,10 +1,12 @@
 {
   "name": "imap-idle-keep-connection",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "use node-imap to connect to an imap server. Keep connection alive at all costs and only emit mail event.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run lint",
+    "lint": "eslint --ext .js .",
+    "release": "release-script"
   },
   "author": "Garfonso <garfonso@mobo.info>",
   "license": "MIT",
@@ -14,5 +16,10 @@
   "dependencies": {
     "node-imap": "github:Garfonso/node-imap"
   },
-  "repository": "https://github.com/Garfonso/ImapIdleKeepConnection"
+  "repository": "https://github.com/Garfonso/ImapIdleKeepConnection",
+  "devDependencies": {
+    "@alcalzone/release-script": "^3.5.9",
+    "@alcalzone/release-script-plugin-license": "^3.5.9",
+    "eslint": "^8.36.0"
+  }
 }

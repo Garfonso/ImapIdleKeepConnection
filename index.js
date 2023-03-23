@@ -6,6 +6,7 @@
  */
 
 const Imap = require('node-imap'); //use our own imap. But we keep npm imap installed to have the dependencies installed, too. Check if this works.
+const EventEmitter = require('events').EventEmitter;
 
 class ImapIdleConnectionAndEvent extends EventEmitter {
     name = '';
@@ -19,10 +20,10 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
     mailbox = 'INBOX';
 
     log = {
-        error: () => { console.error(arguments); },
+        error: (...msgs) => { console.error(msgs); },
         debug: () => { },
         info: () => { }
-    }
+    };
 
     imap;
 
