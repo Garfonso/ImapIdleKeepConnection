@@ -72,7 +72,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
     onMail(numNewMsgs, noSender = false) {
         this.log.info('new Mail');
         this.numMailRuns += 1;
-        this.emit('mail', numNewMsgs);
+        this.emit('mail', this.imap, numNewMsgs, noSender);
     }
 
     onError(err) {
