@@ -54,6 +54,11 @@ jobs:
     needs: [unit-tests]
 
     runs-on: ubuntu-latest
+
+    # Write permissions are required to create Github releases
+    permissions:
+      contents: write
+
     strategy:
       matrix:
         node-version: [18.x]
