@@ -43,6 +43,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
                     this.retriesSinceLastSuccess += 1;
                 } else {
                     this.error('Already tried to reconnect', this.retriesSinceLastSuccess, 'times. Will stop now to avoid bans. Please check credentials.');
+                    this.emit('error', new Error('too many retries... failing.'));
                 }
             } else if (this.connecting) {
                 this.log.debug('Already connecting -', funcName);
@@ -68,6 +69,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
         this.imap.openBox(this.mailbox, true, () => this.onOpenBox());
         this.connecting = false;
         this.active = true;
+        this.emit('ready', this.imap);
     }
 
     onMail(numNewMsgs, noSender = false) {
@@ -154,6 +156,8 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
         }
 
         this.imap.connect();
+
+        this.intervalHandler = setInterval(() => this.reconnect('triggered'), 300000); //timeout needs to be higher than the one in reconnect itself.
     }
 
     endWatch() {
