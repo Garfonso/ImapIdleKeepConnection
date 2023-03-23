@@ -13,5 +13,6 @@
   ],
   "dependencies": {
     "node-imap": "^0.9.6"
-  }
+  },
+  "repository": "https://github.com/Garfonso/ImapIdleKeepConnection"
 }
