@@ -12,7 +12,7 @@
     "index.js"
   ],
   "dependencies": {
-    "node-imap": "^0.9.6"
+    "node-imap": "github:Garfonso/node-imap"
   },
   "repository": "https://github.com/Garfonso/ImapIdleKeepConnection"
 }
