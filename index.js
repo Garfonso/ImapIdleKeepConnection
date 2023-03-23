@@ -19,9 +19,9 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
     mailbox = 'INBOX';
 
     log = {
-        error: () => { console.log(arguments); },
-        debug: () => { console.log(arguments); },
-        info: () => { console.log(arguments); }
+        error: () => { console.error(arguments); },
+        debug: () => { },
+        info: () => { }
     }
 
     imap;
@@ -126,12 +126,12 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
 
             //idle stuff:
             keepalive: {
-                interval: 10000, //default 10000ms - NOOPs are send & idleInterval is checked
-                idleInterval: 120000, //default 300.000ms - interval at which IDLE command is resend - set to 2min on 12.12.2016
+                interval: params.interval || 10000, //default 10000ms - NOOPs are send & idleInterval is checked
+                idleInterval: params.idleInterval || 120000, //default 300.000ms - interval at which IDLE command is resend - set to 2min on 12.12.2016
                 // -> ca. 150.000ms seems to be necessary for outlook. So have this at 120s.
                 // -> now very few disconnects.. let's see.
                 // -> profihost sometimes "connection end" -> i.e. no error. Hm. Too many?
-                forceNoop: false //default: false - force use of NOOP keepalice on servers also support IDLE
+                forceNoop: params.forceNoop || false //default: false - force use of NOOP keepalice on servers also support IDLE
             }
         });
 
