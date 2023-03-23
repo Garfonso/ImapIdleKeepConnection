@@ -4,6 +4,9 @@
   Placeholder for the next version (at the beginning of the line):
   ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+- testing tooling...
+
 ## 0.0.2 (2023-03-23)
 - update dependency of node-imap
 
