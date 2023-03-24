@@ -4,6 +4,9 @@
   Placeholder for the next version (at the beginning of the line):
   ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+- add box signal to transmit the opened box outside.
+
 ## 0.0.6 (2023-03-23)
 - add error and ready events
 - add reconnect interval again

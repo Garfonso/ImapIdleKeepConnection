@@ -52,7 +52,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
         }, Math.round(Math.random() * 30000) + 120000); //between 120s and 150s.
     }
 
-    onOpenBox(err /*, box */) {
+    onOpenBox(err , box) {
         this.log.debug('onOpenBox');
         if (err) {
             this.log.error('Error in opening box:', err);
@@ -60,6 +60,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
             //params.debug("Box:", box);
             this.log.info('Idle at work now.');
         }
+        this.emit('box', box);
     }
 
     onReady() {
