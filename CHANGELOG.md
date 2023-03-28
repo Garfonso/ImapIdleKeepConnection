@@ -4,7 +4,7 @@
   Placeholder for the next version (at the beginning of the line):
   ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 0.1.1 (2023-03-28)
 - fix double on ready subscription
 
 ## 0.1.0 (2023-03-24)
