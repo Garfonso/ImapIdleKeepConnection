@@ -144,7 +144,6 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
         this.imap.on('error', () => this.onError());
         this.imap.on('close', () => this.onClose());
         this.imap.on('end', () => this.onEnd());
-        this.imap.on('ready', () => this.onReady());
 
         if (typeof params.log === 'function') {
             this.log.info = params.log;

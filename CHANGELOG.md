@@ -4,6 +4,9 @@
   Placeholder for the next version (at the beginning of the line):
   ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+- fix double on ready subscription
+
 ## 0.1.0 (2023-03-24)
 - add box signal to transmit the opened box outside.
 
