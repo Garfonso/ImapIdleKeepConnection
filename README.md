@@ -10,6 +10,7 @@ const ImapIdleKeepConnection = require('imap-idle-keep-connection');
 const imapConnection = new ImapIdleKeepConnection({
     user: MailUser,
     password: MailPassword,
+    xoauth2: token, //alternative: supply xoauth2 token instead of password. You'll have to obtain the token yourself. 
     host: MailServer,
     port: MailServerPort,
     tls: true, //use TLS or not

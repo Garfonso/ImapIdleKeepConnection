@@ -108,6 +108,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
      *     name: name of the idle watcher, needs to be unique!
      *     user
      *     password
+     *     xoauth2
      *     host
      *     port
      *     tls
@@ -124,6 +125,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
         this.imap = new Imap({
             user: params.user,
             password: params.password,
+            xoauth2: params.xoauth2,
             host: params.host,
             port: params.port,
             tls: params.tls,
