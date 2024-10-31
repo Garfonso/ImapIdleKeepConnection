@@ -165,6 +165,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
             this.log.error = params.error;
         }
 
+        this.log.debug('ImapIdleConnectionAndEvent created with params:', JSON.stringify(params));
         this.imap.connect();
 
         this.intervalHandler = setInterval(() => this.reconnect('triggered'), 300000); //timeout needs to be higher than the one in reconnect itself.
