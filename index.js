@@ -8,6 +8,11 @@
 const Imap = require('node-imap'); //use our own imap. But we keep npm imap installed to have the dependencies installed, too. Check if this works.
 const EventEmitter = require('events').EventEmitter;
 
+const _build_XOAuth2_token = (user='', access_token='') => Buffer
+    .from([`user=${user}`, `auth=Bearer ${access_token}`, '', '']
+        .join('\x01'), 'utf-8')
+    .toString('base64');
+
 class ImapIdleConnectionAndEvent extends EventEmitter {
     name = '';
     connecting = true;
@@ -125,7 +130,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
         this.imap = new Imap({
             user: params.user,
             password: params.password,
-            xoauth2: params.xoauth2,
+            xoauth2: params.xoauth2 ? _build_XOAuth2_token(params.user, params.xoauth2) : undefined,
             host: params.host,
             port: params.port,
             tls: params.tls,

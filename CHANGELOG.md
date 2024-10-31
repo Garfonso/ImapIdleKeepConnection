@@ -4,6 +4,9 @@
   Placeholder for the next version (at the beginning of the line):
   ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+- problem with xoauth2 fixed.
+
 ## 0.2.0 (2024-10-30)
 - add support for xoauth2.
 
