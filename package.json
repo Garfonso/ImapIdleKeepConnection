@@ -1,6 +1,6 @@
 {
   "name": "imap-idle-keep-connection",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "use node-imap to connect to an imap server. Keep connection alive at all costs and only emit mail event.",
   "main": "index.js",
   "scripts": {
