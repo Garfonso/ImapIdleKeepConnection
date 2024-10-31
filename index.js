@@ -99,8 +99,11 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
         this.reconnect('Close');
     }
 
-    onEnd() {
+    onEnd(err) {
         this.log.info('Connection ended...');
+        if (err) {
+            this.log.info('Error:', err);
+        }
         this.active = false;
         this.connecting = false;
         this.reconnect('End');
