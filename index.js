@@ -47,7 +47,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
                     this.disconnects += 1;
                     this.retriesSinceLastSuccess += 1;
                 } else {
-                    this.error('Already tried to reconnect', this.retriesSinceLastSuccess, 'times. Will stop now to avoid bans. Please check credentials.');
+                    this.log.error('Already tried to reconnect', this.retriesSinceLastSuccess, 'times. Will stop now to avoid bans. Please check credentials.');
                     this.emit('error', new Error('too many retries... failing.'));
                 }
             } else if (this.connecting) {
