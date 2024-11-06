@@ -39,7 +39,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
         }
         this.timeoutHandler = setTimeout(() => {
             if (this.imap.state !== 'connected' && this.imap.state !== 'authenticated' && !this.connecting) {
-                if (this.retriesSinceLastSuccess < 500) {
+                if (this.retriesSinceLastSuccess < 10) {
                     this.log.error('Reconnecting -', funcName);
                     this.log.error('Imap state:', this.imap.state, 'active flag:', this.active, 'connecting flag:', this.connecting);
                     this.connecting = true;
@@ -80,6 +80,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
 
     onMail(numNewMsgs, noSender = false) {
         this.log.info('new Mail');
+        this.retriesSinceLastSuccess = 0;
         this.numMailRuns += 1;
         this.emit('mail', this.imap, numNewMsgs, noSender);
     }
