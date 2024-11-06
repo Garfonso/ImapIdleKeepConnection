@@ -30,6 +30,14 @@ imapConnection.on('mail', (imap, numNewMessages) => {
     console.log('yay, got new mail!');
     //use imap, which is a node-imap instance to maybe receive mail.
 });
+
+imapConnection.on('need-authentication', () => {
+    console.log('Authentication failed. Won\'t retry. Get new token (maybe, if oauth) and start again.');
+});
+
+imapConnection.on('error', error => {
+    console.log('Something went horribly wrong...', error);
+});
 ```
 
 
