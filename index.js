@@ -7,6 +7,7 @@
 
 const Imap = require('node-imap'); //use our own imap. But we keep npm imap installed to have the dependencies installed, too. Check if this works.
 const EventEmitter = require('events').EventEmitter;
+const { Buffer } = require('node:buffer');
 
 const _build_XOAuth2_token = (user='', access_token='') => Buffer
     .from([`user=${user}`, `auth=Bearer ${access_token}`, '', '']
@@ -20,6 +21,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
     intervalHandler;
     disconnects = 0;
     numMailRuns = 0;
+    noReconnectBecauseOfAuth = false; //prevent all reconnects if this is true -> need to create a new object with new credentials.
     retriesSinceLastSuccess = 0;
     timeoutHandler;
     mailbox = 'INBOX';
@@ -36,6 +38,10 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
         if (this.timeoutHandler) {
             clearTimeout(this.timeoutHandler);
             this.timeoutHandler = false;
+        }
+        if (this.noReconnectBecauseOfAuth) {
+            this.log.info('Will not reconnect, because had auth error.');
+            return;
         }
         this.timeoutHandler = setTimeout(() => {
             if (this.imap.state !== 'connected' && this.imap.state !== 'authenticated' && !this.connecting) {
@@ -87,6 +93,14 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
 
     onError(err) {
         this.log.info('Have error: ', err);
+        if (err) {
+            this.log.info('Error from source:', err.source);
+            if (err.source === 'authentication') {
+                this.noReconnectBecauseOfAuth = true;
+                this.emit('need-authentication', err);
+                return; //don't try to reconnect on authentication error.
+            }
+        }
         this.active = false;
         this.connecting = false;
         this.reconnect('Error');
@@ -94,7 +108,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
 
     onClose(err) {
         //Can this happen without error before?
-        this.log.info('Have close: ', err);
+        this.log.info('Have close, error: ', err);
         this.active = false;
         this.connecting = false;
         this.reconnect('Close');
@@ -154,11 +168,11 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
             }
         });
 
-        this.imap.on('ready', () => this.onReady());
+        this.imap.on('ready', this.onReady.bind(this));
         this.imap.on('mail', (numNewMessages, noSender) => this.onMail(numNewMessages, noSender));
-        this.imap.on('error', () => this.onError());
-        this.imap.on('close', () => this.onClose());
-        this.imap.on('end', () => this.onEnd());
+        this.imap.on('error', this.onError.bind(this));
+        this.imap.on('close', this.onClose.bind(this));
+        this.imap.on('end', this.onEnd.bind(this));
 
         if (typeof params.log === 'function') {
             this.log.info = params.log;
