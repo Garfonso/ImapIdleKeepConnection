@@ -103,7 +103,11 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
     onEnd(err) {
         this.log.info('Connection ended...');
         if (err) {
-            this.log.info('Error:', err);
+            this.log.info('Error:', err, 'From source:', err.source);
+            if (err.source === 'authentication') {
+                this.emit('need-authentication', err);
+                return; //don't try to reconnect on authentication error.
+            }
         }
         this.active = false;
         this.connecting = false;
