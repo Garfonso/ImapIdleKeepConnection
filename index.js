@@ -98,6 +98,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
             if (err.source === 'authentication') {
                 this.noReconnectBecauseOfAuth = true;
                 this.emit('need-authentication', err);
+                this.endWatch();
                 return; //don't try to reconnect on authentication error.
             }
         }

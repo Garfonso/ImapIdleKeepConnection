@@ -33,6 +33,8 @@ imapConnection.on('mail', (imap, numNewMessages) => {
 
 imapConnection.on('need-authentication', () => {
     console.log('Authentication failed. Won\'t retry. Get new token (maybe, if oauth) and start again.');
+    //need to create new object with new credentials in this case!
+    imapConnection.endWatch();
 });
 
 imapConnection.on('error', error => {
