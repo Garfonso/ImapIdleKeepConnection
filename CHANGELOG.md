@@ -4,7 +4,7 @@
   Placeholder for the next version (at the beginning of the line):
   ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 0.3.1 (2024-11-06)
 - remove debug logging (which could include password.)
 
 ## 0.3.0 (2024-11-06)
