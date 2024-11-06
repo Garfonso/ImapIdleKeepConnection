@@ -4,7 +4,7 @@
   Placeholder for the next version (at the beginning of the line):
   ## **WORK IN PROGRESS**
 -->
-## 0.3.0 (2024-11-06)
+## **WORK IN PROGRESS**
 - added `need-authentication` message. It will be emitted, if an authentication error happens.
 
 ## 0.2.3 (2024-11-04)
