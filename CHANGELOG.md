@@ -4,6 +4,9 @@
   Placeholder for the next version (at the beginning of the line):
   ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+- remove debug logging (which could include password.)
+
 ## 0.3.0 (2024-11-06)
 - added `need-authentication` message. It will be emitted, if an authentication error happens.
 
