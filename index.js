@@ -40,7 +40,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
             this.timeoutHandler = false;
         }
         if (this.noReconnectBecauseOfAuth) {
-            this.log.info('Will not reconnect, because had auth error.');
+            this.log.info('Will not reconnect, because had auth error, was requested by ' + funcName);
             return;
         }
         this.timeoutHandler = setTimeout(() => {
@@ -192,6 +192,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
 
     endWatch() {
         clearTimeout(this.timeoutHandler);
+        clearInterval(this.intervalHandler);
         this.imap.end();
     }
 
