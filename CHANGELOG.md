@@ -4,6 +4,9 @@
   Placeholder for the next version (at the beginning of the line):
   ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+- fix type.
+
 ## 0.4.1 (2025-02-27)
 - fix package.json to include types...
 
@@ -47,7 +50,7 @@
 
 ## 0.0.4 (2023-03-23)
 - test tooling once more.
-
+[CHANGELOG.md](CHANGELOG.md)
 ## 0.0.3 (2023-03-23)
 - testing tooling...
 
