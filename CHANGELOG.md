@@ -6,6 +6,9 @@
 -->
 ## **WORK IN PROGRESS**
 - fix type.
+- fix box is undefined in result
+- fix mailbox parameter was ignored
+- fix mailbox was opened readOnly (so flags could not be set)
 
 ## 0.4.1 (2025-02-27)
 - fix package.json to include types...
