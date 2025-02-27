@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import Connection = require('node-imap');
 
-declare module 'imap-idle-keep-connection' {
+declare namespace imapIdleKeepConnection {
     interface LogMethods {
         error: (...msgs: any[]) => void;
         debug: (...msgs: any[]) => void;
@@ -51,6 +51,6 @@ declare module 'imap-idle-keep-connection' {
         endWatch(): void;
         getStatus(): string;
     }
-
-    export = ImapIdleConnectionAndEvent;
 }
+
+export = imapIdleKeepConnection.ImapIdleConnectionAndEvent;
