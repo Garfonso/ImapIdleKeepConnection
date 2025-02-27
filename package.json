@@ -3,6 +3,7 @@
   "version": "0.4.0",
   "description": "use node-imap to connect to an imap server. Keep connection alive at all costs and only emit mail event.",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "test": "npm run lint",
     "lint": "eslint --ext .js .",
@@ -11,7 +12,8 @@
   "author": "Garfonso <garfonso@mobo.info>",
   "license": "MIT",
   "files": [
-    "index.js"
+    "index.js",
+    "index.d.ts"
   ],
   "dependencies": {
     "node-imap": "github:Garfonso/node-imap"

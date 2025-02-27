@@ -4,6 +4,9 @@
   Placeholder for the next version (at the beginning of the line):
   ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+- fix package.json to include types...
+
 ## 0.4.0 (2025-02-27)
 - add type description
 
