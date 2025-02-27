@@ -4,7 +4,7 @@
   Placeholder for the next version (at the beginning of the line):
   ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 0.4.2 (2025-02-27)
 - fix type.
 - fix box is undefined in result
 - fix mailbox parameter was ignored
@@ -54,6 +54,7 @@
 ## 0.0.4 (2023-03-23)
 - test tooling once more.
 [CHANGELOG.md](CHANGELOG.md)
+
 ## 0.0.3 (2023-03-23)
 - testing tooling...
 
