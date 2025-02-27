@@ -150,6 +150,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
     constructor(params) {
         super();
 
+        this.mailbox = params.mailbox;
         this.imap = new Imap({
             user: params.user,
             password: params.password,
