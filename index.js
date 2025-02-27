@@ -78,7 +78,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
         this.log.info('Successful connected & authenticated.');
         //open read only.
         this.retriesSinceLastSuccess = 0;
-        this.imap.openBox(this.mailbox, true, () => this.onOpenBox());
+        this.imap.openBox(this.mailbox, false, (err, box) => this.onOpenBox(err, box));
         this.connecting = false;
         this.active = true;
         this.emit('ready', this.imap);
