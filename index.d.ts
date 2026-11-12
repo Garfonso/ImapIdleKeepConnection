@@ -33,6 +33,8 @@ declare namespace imapIdleKeepConnection {
         disconnects: number;
         numMailRuns: number;
         noReconnectBecauseOfAuth: boolean;
+        /** endWatch() was called, the connection will never reconnect. */
+        ended: boolean;
         retriesSinceLastSuccess: number;
         timeoutHandler: NodeJS.Timeout;
         mailbox: string;

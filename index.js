@@ -22,6 +22,7 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
     disconnects = 0;
     numMailRuns = 0;
     noReconnectBecauseOfAuth = false; //prevent all reconnects if this is true -> need to create a new object with new credentials.
+    ended = false; //endWatch() was called -> never reconnect again.
     retriesSinceLastSuccess = 0;
     timeoutHandler;
     mailbox = 'INBOX';
@@ -38,6 +39,10 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
         if (this.timeoutHandler) {
             clearTimeout(this.timeoutHandler);
             this.timeoutHandler = false;
+        }
+        if (this.ended) {
+            this.log.debug('Will not reconnect, because watch was ended, was requested by ' + funcName);
+            return;
         }
         if (this.noReconnectBecauseOfAuth) {
             this.log.info('Will not reconnect, because had auth error, was requested by ' + funcName);
@@ -192,7 +197,9 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
     }
 
     endWatch() {
+        this.ended = true;
         clearTimeout(this.timeoutHandler);
+        this.timeoutHandler = false;
         clearInterval(this.intervalHandler);
         this.imap.end();
     }
