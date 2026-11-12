@@ -6,6 +6,7 @@
 -->
 ## **WORK IN PROGRESS**
 - fix: never reconnect after endWatch(). Close/end events after endWatch() scheduled a reconnect, so ended watchers came back after 2 minutes.
+- less log noise: per mail, close/end and auth error details are debug now, reconnects are one info line, errors without stack traces.
 
 ## 0.4.2 (2025-02-27)
 - fix type.

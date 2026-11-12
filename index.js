@@ -45,14 +45,14 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
             return;
         }
         if (this.noReconnectBecauseOfAuth) {
-            this.log.info('Will not reconnect, because had auth error, was requested by ' + funcName);
+            this.log.debug('Will not reconnect, because had auth error, was requested by ' + funcName);
             return;
         }
         this.timeoutHandler = setTimeout(() => {
             if (this.imap.state !== 'connected' && this.imap.state !== 'authenticated' && !this.connecting) {
                 if (this.retriesSinceLastSuccess < 10) {
-                    this.log.error('Reconnecting -', funcName);
-                    this.log.error('Imap state:', this.imap.state, 'active flag:', this.active, 'connecting flag:', this.connecting);
+                    this.log.info('Reconnecting (' + funcName + '), attempt ' + (this.retriesSinceLastSuccess + 1) + ' of 10.');
+                    this.log.debug('Imap state:', this.imap.state, 'active flag:', this.active, 'connecting flag:', this.connecting);
                     this.connecting = true;
                     this.imap.connect();
                     this.disconnects += 1;
@@ -71,16 +71,16 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
     onOpenBox(err , box) {
         this.log.debug('onOpenBox');
         if (err) {
-            this.log.error('Error in opening box:', err);
+            this.log.error('Error in opening box ' + this.mailbox + ':', err.message);
         } else {
             //params.debug("Box:", box);
-            this.log.info('Idle at work now.');
+            this.log.debug('Idle at work now.');
         }
         this.emit('box', box);
     }
 
     onReady() {
-        this.log.info('Successful connected & authenticated.');
+        this.log.info('Connected.');
         //open read only.
         this.retriesSinceLastSuccess = 0;
         this.imap.openBox(this.mailbox, false, (err, box) => this.onOpenBox(err, box));
@@ -90,23 +90,24 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
     }
 
     onMail(numNewMsgs, noSender = false) {
-        this.log.info('new Mail');
+        this.log.debug('new Mail');
         this.retriesSinceLastSuccess = 0;
         this.numMailRuns += 1;
         this.emit('mail', this.imap, numNewMsgs, noSender);
     }
 
     onError(err) {
-        this.log.info('Have error: ', err);
+        this.log.debug('Have error: ', err);
         if (err) {
-            this.log.info('Error from source:', err.source);
             if (err.source === 'authentication') {
+                // the owner gets need-authentication and decides what to log.
                 this.noReconnectBecauseOfAuth = true;
                 this.emit('need-authentication', err);
                 this.endWatch();
                 return; //don't try to reconnect on authentication error.
             }
         }
+        this.log.info('Connection error' + (err && err.source ? ' (' + err.source + ')' : '') + ':', err && err.message);
         this.active = false;
         this.connecting = false;
         this.reconnect('Error');
@@ -114,16 +115,16 @@ class ImapIdleConnectionAndEvent extends EventEmitter {
 
     onClose(err) {
         //Can this happen without error before?
-        this.log.info('Have close, error: ', err);
+        this.log.debug('Have close, error: ', err);
         this.active = false;
         this.connecting = false;
         this.reconnect('Close');
     }
 
     onEnd(err) {
-        this.log.info('Connection ended...');
+        this.log.debug('Connection ended...');
         if (err) {
-            this.log.info('Error:', err, 'From source:', err.source);
+            this.log.debug('Error:', err, 'From source:', err.source);
             if (err.source === 'authentication') {
                 this.emit('need-authentication', err);
                 return; //don't try to reconnect on authentication error.
