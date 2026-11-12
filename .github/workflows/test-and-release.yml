@@ -2,114 +2,104 @@
 # as well as tags with a semantic version
 on:
   push:
-    # Configure your tested branches here, I like to check all of them. You can leave this out if you only want to deploy
     branches:
       - "*"
-    # You MUST limit tags to ones that are compatible with the version scheme this script uses. DO NOT include any others or they will be released aswell
+    # You MUST limit tags to ones that are compatible with the version scheme of release-script.
+    # DO NOT include any others or they will be released as well.
     tags:
       # normal versions
       - "v[0-9]+.[0-9]+.[0-9]+"
       # pre-releases
       - "v[0-9]+.[0-9]+.[0-9]+-**"
-  # This runs the workflow for all pull requests. You can leave this out if you only want to deploy
   pull_request: {}
 
+permissions:
+  contents: read
+
 jobs:
-  #
-  # ... your other jobs go here ...
-  #
   unit-tests:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
 
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [20.x] # This should be LTS
+        node-version: [22.x, 24.x]
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint TypeScript code
-        run: npm run lint
+      - name: Lint and test
+        run: npm test
 
-  # Deploys the final package to NPM and Github Actions
-  deploy:
-    # Trigger this step only when a commit on master is tagged with a version number
+  # Publishes to npm with trusted publishing (OIDC), no npm token needed.
+  # Configure on npmjs.com: package settings -> Trusted Publisher -> GitHub Actions,
+  # user Garfonso, repository ImapIdleKeepConnection, workflow test-and-release.yml.
+  publish:
+    # Trigger this step only when a commit is tagged with a version number
     if: |
       contains(github.event.head_commit.message, '[skip ci]') == false &&
       github.event_name == 'push' &&
       startsWith(github.ref, 'refs/tags/v')
 
-    # Define which jobst must succeed before the release
     needs: [unit-tests]
-
     runs-on: ubuntu-latest
 
-    # Write permissions are required to create Github releases
     permissions:
-      contents: write
-
-    strategy:
-      matrix:
-        node-version: [20.x]
+      contents: read
+      id-token: write # OIDC token for npm
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/checkout@v7
         with:
-          node-version: ${{ matrix.node-version }}
+          persist-credentials: false
 
-      - name: Extract the version and commit body from the tag
-        id: extract_release
-        # The body may be multiline, therefore we need to escape some characters
-        run: |
-          VERSION="${{ github.ref }}"
-          VERSION=${VERSION##*/v}
-          echo "::set-output name=VERSION::$VERSION"
-          BODY=$(git show -s --format=%b)
-          BODY="${BODY//'%'/'%25'}"
-          BODY="${BODY//$'\n'/'%0A'}"
-          BODY="${BODY//$'\r'/'%0D'}"
-          echo "::set-output name=BODY::$BODY"
+      # Node 24 ships npm >= 11.5.1, required for trusted publishing.
+      # No npm cache and no npm ci: no third party code runs while the OIDC token is available,
+      # the package has no build step.
+      - name: Use Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
+          package-manager-cache: false
 
-      # If you are using TypeScript, additional build steps might be necessary
-      # Run them here, e.g.:
-      # - name: Install dependencies
-      #   run: npm ci
-      # - name: Create a clean build
-      #   run: npx gulp build
-
-      # How to release packages to npm depends on the package type.
-      # Choose one of these possibilities and or comment out the others:
-      # a) For normal packages (no monorepo):
       - name: Publish package to npm
         run: |
-          npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
-          npm whoami
+          npm --version
           npm publish
 
-      - name: Create Github Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+  github-release:
+    needs: [publish]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # create the release
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release v${{ steps.extract_release.outputs.VERSION }}
-          draft: false
-          # Prerelease versions create prereleases on Github
-          prerelease: ${{ contains(steps.extract_release.outputs.VERSION, '-') }}
-          body: ${{ steps.extract_release.outputs.BODY }}
+          persist-credentials: false
+
+      # release-script puts the changelog of the version into the body of the release commit
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          git show -s --format=%b > release-notes.md
+          PRERELEASE=""
+          if [[ "$TAG" == *-* ]]; then PRERELEASE="--prerelease"; fi
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "Release $TAG" --notes-file release-notes.md --verify-tag $PRERELEASE

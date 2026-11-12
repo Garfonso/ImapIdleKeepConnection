@@ -18,7 +18,10 @@
   "dependencies": {
     "node-imap": "github:Garfonso/node-imap"
   },
-  "repository": "https://github.com/Garfonso/ImapIdleKeepConnection",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Garfonso/ImapIdleKeepConnection.git"
+  },
   "devDependencies": {
     "@alcalzone/release-script": "^3.5.9",
     "@alcalzone/release-script-plugin-license": "^3.5.9",
