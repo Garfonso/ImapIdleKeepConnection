@@ -165,6 +165,13 @@ describe('KeepConnection', () => {
             await tick(10 * SECOND);
             assert.equal(connection.state, 'connected');
             assert.deepEqual(logger.lines(), ['info Connected.'], 'lost + reconnected only on debug');
+
+            // lost again later and the reconnect fails: that is worth a line.
+            await tick(30 * MINUTE);
+            FakeClient.connectBehaviours = [fail(networkError())];
+            FakeClient.last().drop();
+            await tick(10 * SECOND);
+            assert.deepEqual(logger.lines(), ['info Connected.', 'info Server not reachable: getaddrinfo ENOTFOUND imap.example.org - retry in 30s.']);
             assert.ok(logger.lines('debug').some(l => l === 'debug Connection lost: connect ECONNRESET - reconnect in 10s.'));
         });
 

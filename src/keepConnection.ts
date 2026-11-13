@@ -110,6 +110,8 @@ interface Streak {
     kindCount: number;
     /** "still failing" was logged */
     reported: boolean;
+    /** kind that was logged on info/error level already */
+    announced?: FailureKind;
 }
 
 const LABELS: Record<FailureKind, string> = {
@@ -416,7 +418,8 @@ export class KeepConnection extends EventEmitter<KeepConnectionEvents> {
             this.#log.debug(label + message + ' - reconnect in ' + formatDuration(retryIn) + '.');
             return;
         }
-        if (streak.kindCount === 1) {
+        if (streak.announced !== streak.kind) {
+            streak.announced = streak.kind;
             const line = label + message + ' - ' + next + '.';
             if (streak.kind === 'other') {
                 this.#log.error(line);
