@@ -4,6 +4,12 @@
   Placeholder for the next version (at the beginning of the line):
   ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+- BREAKING: rewritten in TypeScript on imapflow instead of node-imap, new API (`KeepConnection`, `start()`, `stop()`, `credentials` callback, `failure` event), ESM, Node.js >= 20.19. See README, "Migrating from 0.x".
+- tells failures apart (network, auth, credentials, mailbox, throttle, other) with own backoff each, never gives up. Network errors are retried forever.
+- credentials are fetched before every attempt, so OAuth tokens never go stale.
+- quiet logging: one line per problem, repeated network failures on debug, one line after an hour and when connected again.
+
 ## 0.4.3 (2026-11-13)
 - fix: never reconnect after endWatch(). Close/end events after endWatch() scheduled a reconnect, so ended watchers came back after 2 minutes.
 - less log noise: per mail, close/end and auth error details are debug now, reconnects are one info line, errors without stack traces.
