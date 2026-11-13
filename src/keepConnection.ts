@@ -103,7 +103,7 @@ export interface KeepConnectionEvents {
 
 interface Streak {
     start: number;
-    /** failed attempts (lost connections not counted) */
+    /** failed connection attempts (lost connections not counted) */
     attempts: number;
     kind: FailureKind;
     /** failures of `kind` in a row, selects the delay */
@@ -271,8 +271,14 @@ export class KeepConnection extends EventEmitter<KeepConnectionEvents> {
                 return;
             }
             const reachable = await this.#probe(this.host, this.port);
-            if (this.#state === 'connecting') {
-                this.#fail(reachable ? 'credentials' : 'network', toError(err));
+            if (this.#state !== 'connecting') {
+                return;
+            }
+            if (reachable) {
+                this.#fail('credentials', toError(err));
+            } else {
+                this.#fail('network', new Error('no connection to ' + this.host + ':' + this.port +
+                    ', credentials failed too: ' + describeError(err), { cause: err }));
             }
             return;
         }
@@ -346,7 +352,7 @@ export class KeepConnection extends EventEmitter<KeepConnectionEvents> {
         if (stable) {
             this.#streak = undefined;
         }
-        this.#fail(err ? classifyError(err) : 'network', err ?? new Error('Connection closed.'), stable);
+        this.#fail(err ? classifyError(err) : 'network', err ?? new Error('Connection closed.'), stable ? 'stable' : 'unstable');
     }
 
     #onExists(client: ImapFlow, data: ExistsEvent): void {
@@ -358,7 +364,9 @@ export class KeepConnection extends EventEmitter<KeepConnectionEvents> {
         this.#emitSafe('mail', { count: data.count, prevCount: data.prevCount });
     }
 
-    #fail(kind: FailureKind, error: Error, lost = false): void {
+    /** drop: an established connection was lost, 'stable' if it worked for a while. */
+    #fail(kind: FailureKind, error: Error, drop?: 'stable' | 'unstable'): void {
+        const lost = drop === 'stable';
         const now = Date.now();
         const streak = this.#streak ??= { start: now, attempts: 0, kind, kindCount: 0, reported: false };
         if (streak.kind !== kind) {
@@ -366,13 +374,13 @@ export class KeepConnection extends EventEmitter<KeepConnectionEvents> {
             streak.kindCount = 0;
         }
         streak.kindCount += 1;
-        if (!lost) {
-            streak.attempts += 1;
+        if (!drop) {
+            streak.attempts += 1; // drops only raise the delay (kindCount)
         }
         const message = describeError(error);
         this.#lastError = message;
         const retryIn = this.#retryDelay(kind, streak.kindCount, error);
-        this.#logFailure(streak, message, retryIn, lost);
+        this.#logFailure(streak, message, retryIn, drop);
 
         this.#setState('waiting');
         this.#nextAttempt = new Date(now + retryIn);
@@ -392,8 +400,9 @@ export class KeepConnection extends EventEmitter<KeepConnectionEvents> {
         return retryDelay(delays, count);
     }
 
-    #logFailure(streak: Streak, message: string, retryIn: number, lost: boolean): void {
-        const label = streak.kind === 'mailbox' ? 'Mailbox "' + this.mailbox + '" not available' : LABELS[streak.kind];
+    #logFailure(streak: Streak, message: string, retryIn: number, drop: 'stable' | 'unstable' | undefined): void {
+        const label = drop ? 'Connection lost'
+            : streak.kind === 'mailbox' ? 'Mailbox "' + this.mailbox + '" not available' : LABELS[streak.kind];
         const next = retryIn > 0 ? 'retry in ' + formatDuration(retryIn) : 'retry now';
         const times = streak.kindCount > 1 ? ' (' + streak.kindCount + ' times in a row)' : '';
         message = withoutPrefix(message, LABELS[streak.kind]);
@@ -403,8 +412,8 @@ export class KeepConnection extends EventEmitter<KeepConnectionEvents> {
             this.#log.error(label + times + message + ' - ' + next + '.');
             return;
         }
-        if (lost && streak.kindCount === 1) {
-            this.#log.debug('Connection lost' + message + ' - reconnect in ' + formatDuration(retryIn) + '.');
+        if (drop === 'stable' && streak.kindCount === 1) {
+            this.#log.debug(label + message + ' - reconnect in ' + formatDuration(retryIn) + '.');
             return;
         }
         if (streak.kindCount === 1) {

@@ -182,6 +182,8 @@ describe('KeepConnection', () => {
                 delays.push(waited);
             }
             assert.deepEqual(delays, [10 * SECOND, 30 * SECOND, MINUTE, 2 * MINUTE]);
+            assert.deepEqual(logger.lines(), ['info Connected.', 'info Connection lost: Connection closed. - retry in 10s.'],
+                'first quick drop on info, repeated ones on debug');
         });
     });
 
@@ -239,7 +241,7 @@ describe('KeepConnection', () => {
                 probe: async () => false,
             });
             assert.equal(connection.status.failureKind, 'network');
-            assert.deepEqual(logger.lines(), ['info Server not reachable: token endpoint: connection error - retry in 10s.']);
+            assert.deepEqual(logger.lines(), ['info Server not reachable: no connection to imap.example.org:993, credentials failed too: token endpoint: connection error - retry in 10s.']);
             assert.equal(FakeClient.instances.length, 0, 'no connection without credentials');
         });
 
