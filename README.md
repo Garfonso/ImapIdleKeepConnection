@@ -62,7 +62,8 @@ one error line if it still fails after an hour and one info line when connected 
 - `withMailbox(fn)`: run `fn(client)` with the mailbox locked.
 - `state`, `status`: `{ state, since, failures, failureKind, lastError, nextAttempt, connects, mails }`.
 - events `ready(client)`, `mail({ count, prevCount })`, `failure({ kind, error, failures, retryIn, lost })`.
-- options: `host`, `port` (993/143), `secure` (default true), `mailbox`, `credentials`, `logger`,
+- options: `host`, `port` (993/143), `secure` (default true), `mailbox`, `credentials`,
+  `credentialsTimeout` (default 1min), `logger`,
   `trace`, `maxIdleTime` (restart IDLE, default 2min), `delays`, `imapOptions` (passed to imapflow).
 
 Types of imapflow (`ImapFlow`, `SearchObject`, `FetchMessageObject`, ...) are re-exported.
