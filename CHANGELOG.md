@@ -4,7 +4,7 @@
   Placeholder for the next version (at the beginning of the line):
   ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 0.4.3 (2026-11-13)
 - fix: never reconnect after endWatch(). Close/end events after endWatch() scheduled a reconnect, so ended watchers came back after 2 minutes.
 - less log noise: per mail, close/end and auth error details are debug now, reconnects are one info line, errors without stack traces.
 
