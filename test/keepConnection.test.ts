@@ -145,6 +145,13 @@ describe('KeepConnection', () => {
             assert.equal(connection.state, 'connected');
             assert.match(logger.lines().at(-1) ?? '', /^info Connected again after 1\.\dh, \d+ failed attempts\.$/);
             assert.equal(logger.lines().length, 3);
+
+            // lost right away again (still unstable: keeps the long delay) and back:
+            // not "connected again" a second time.
+            FakeClient.last().drop();
+            await tick(5 * MINUTE);
+            assert.equal(connection.state, 'connected');
+            assert.equal(logger.lines().filter(l => l.includes('Connected again')).length, 1);
         });
 
         it('shows the waiting state in the status', async () => {
@@ -176,7 +183,7 @@ describe('KeepConnection', () => {
         });
 
         it('backs off if connections are lost right after connecting', async () => {
-            await started();
+            const connection = await started();
             const delays: number[] = [];
             for (let i = 0; i < 4; i += 1) {
                 FakeClient.last().drop();
@@ -189,6 +196,7 @@ describe('KeepConnection', () => {
                 delays.push(waited);
             }
             assert.deepEqual(delays, [10 * SECOND, 30 * SECOND, MINUTE, 2 * MINUTE]);
+            assert.equal(connection.status.state, 'connected');
             assert.deepEqual(logger.lines(), ['info Connected.', 'info Connection lost: Connection closed. - retry in 10s.'],
                 'first quick drop on info, repeated ones on debug');
         });
@@ -271,6 +279,14 @@ describe('KeepConnection', () => {
             fails = false;
             await tick(5 * MINUTE);
             assert.equal(connection.state, 'connected');
+        });
+
+        it('gives up on a hanging credentials callback', async () => {
+            const connection = await started({ credentials: () => new Promise(() => {}) });
+            assert.equal(connection.state, 'connecting');
+            await tick(60 * SECOND);
+            assert.equal(connection.state, 'waiting');
+            assert.equal(connection.status.lastError, 'Credentials callback timed out.');
         });
 
         it('rejects empty tokens', async () => {

@@ -13,6 +13,7 @@ export const STABLE_AFTER = 60 * 1000;
 /** quiet failures (network, other) are reported again once a streak lasts this long. */
 export const LONG_STREAK = 60 * 60 * 1000;
 const LOGOUT_TIMEOUT = 3 * 1000;
+const DEFAULT_CREDENTIALS_TIMEOUT = 60 * 1000;
 const DEFAULT_MAX_IDLE_TIME = 2 * 60 * 1000;
 
 export interface Logger {
@@ -43,6 +44,8 @@ export interface KeepConnectionOptions {
     /** default INBOX */
     mailbox?: string;
     credentials: Credentials | CredentialsProvider;
+    /** max ms for the credentials callback, default 1 minute (a token request may hang without network). */
+    credentialsTimeout?: number;
     /** default: errors to console.error, nothing else. */
     logger?: Logger;
     /** log imapflow's own messages on debug level (no credentials). */
@@ -265,7 +268,8 @@ export class KeepConnection extends EventEmitter<KeepConnectionEvents> {
         let sessionExpires: Date | number | undefined;
         try {
             const credentials = typeof this.#options.credentials === 'function'
-                ? await this.#options.credentials()
+                ? await withTimeout(Promise.resolve(this.#options.credentials()),
+                    this.#options.credentialsTimeout ?? DEFAULT_CREDENTIALS_TIMEOUT, 'Credentials callback timed out.')
                 : this.#options.credentials;
             ({ auth, sessionExpires } = toAuthOptions(credentials));
         } catch (err) {
@@ -336,6 +340,8 @@ export class KeepConnection extends EventEmitter<KeepConnectionEvents> {
         if (streak && streak.attempts > 0) {
             this.#log.info('Connected again after ' + formatDuration(Date.now() - streak.start) + ', ' +
                 streak.attempts + ' failed attempt' + (streak.attempts > 1 ? 's' : '') + '.');
+            // the streak stays until the connection proved stable (delays), the attempts are reported.
+            streak.attempts = 0;
         } else if (this.#connects === 1) {
             this.#log.info('Connected.');
         } else {
@@ -479,6 +485,14 @@ function toAuthOptions(credentials: Credentials): { auth: AuthOptions; sessionEx
         throw new Error('Neither password nor access token.');
     }
     return { auth: { user: credentials.user, pass: credentials.password } };
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+    let timer: NodeJS.Timeout | undefined;
+    return Promise.race([
+        promise,
+        new Promise<never>((_resolve, reject) => { timer = setTimeout(() => reject(new Error(message)), ms); }),
+    ]).finally(() => clearTimeout(timer));
 }
 
 function toError(err: unknown): Error {
