@@ -1,6 +1,6 @@
 {
   "name": "imap-idle-keep-connection",
-  "version": "0.4.3",
+  "version": "1.0.0",
   "description": "Keep an IMAP IDLE connection alive (imapflow): reconnects with backoff, tells network, authentication and server errors apart and emits mail events.",
   "keywords": [
     "imap",

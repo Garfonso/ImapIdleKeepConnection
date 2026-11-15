@@ -4,7 +4,7 @@
   Placeholder for the next version (at the beginning of the line):
   ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 1.0.0 (2026-11-15)
 - BREAKING: rewritten in TypeScript on imapflow instead of node-imap, new API (`KeepConnection`, `start()`, `stop()`, `credentials` callback, `failure` event), ESM, Node.js >= 20.19. See README, "Migrating from 0.x".
 - tells failures apart (network, auth, credentials, mailbox, throttle, other) with own backoff each, never gives up. Network errors are retried forever.
 - credentials are fetched before every attempt, so OAuth tokens never go stale.
